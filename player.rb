@@ -1,5 +1,5 @@
 class Player
-  attr_reader :name, :cards, :points
+  attr_reader :name, :cards, :points, :money
 
   INITIAL_BANK = 100
   NUMERALS_CARD = /^([1-9]|10)$/
@@ -13,7 +13,7 @@ class Player
   end
 
   def place_bet(bet)
-    @money += bet
+    @money -= bet
     bet
   end
 
