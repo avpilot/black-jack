@@ -1,12 +1,11 @@
 class Dealer < Player
   MAX_POINT_TO_PLAY = 17
 
-  def initialize
-    super('Dealer')
+  def initialize(name = 'Dealer')
+    super(name)
   end
 
   def make_choice
-    :take_card
-    :pass if @points >= MAX_POINT_TO_PLAY
+    @points >= MAX_POINT_TO_PLAY ? :pass : :take_card
   end
 end

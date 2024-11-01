@@ -1,22 +1,34 @@
 require_relative 'game'
-require_relative 'card'
 require_relative 'player'
+require_relative 'card'
 require_relative 'user'
 require_relative 'dealer'
 
 print 'Enter your name: '
 game = Game.new(User.new(gets.chomp), Dealer.new, 10)
-deck = Card.new
-deck.deal_cards(game.players)
 
-puts "Your cards: #{game.current_player.cards * ' '}"
+loop do
+  deck = Card.new
+  deck.deal_cards(game.players)
+  game.show_user_cards
+  loop do
+    case game.current_player.make_choice
+    when :pass
+      case game.next_player.make_choice
+      when :take_card
+        deck.take_card(game.current_player)
+        game.show_user_cards
+      end
+    when :take_card
+      deck.take_card(game.current_player)
+      game.show_user_cards
+    when :show_hand
+      game.result
+      deck.pick_up_cards(game.players)
+      break
+    end
+  end
 
-case game.current_player.make_choice
-when :pass then
-  game.next_player.make_choice
-  game.show_hand
-when :take_card
-  deck.take_card(game.current_player)
-  game.show_hand
-when :show_hand then game.show_hand
+  print 'Continue? [y/n]: '
+  break if gets.chomp.upcase == 'N'
 end

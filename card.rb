@@ -4,12 +4,16 @@ class Card
   end
 
   def take_card(player)
-    player.take_card(@cards.delete_at(-1))
+    player.new_card(@cards.delete_at(-1))
     @cards = new_deck if @cards.empty?
   end
 
   def deal_cards(players)
     players.each { |player| 2.times { take_card(player) } }
+  end
+
+  def pick_up_cards(players)
+    players.map(&:fold_cards)
   end
 
   private
