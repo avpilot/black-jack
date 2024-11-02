@@ -1,11 +1,18 @@
-class Card
+class Deck
+  attr_reader :round_over
+
   def initialize
-    @cards = new_deck
+    @cards = new_shuffled_deck
+    @round_over = false
   end
 
   def take_card(player)
-    player.new_card(@cards.delete_at(-1))
-    @cards = new_deck if @cards.empty?
+    if player.cards.count < 3
+      player.new_card(@cards.delete_at(-1))
+      @cards = new_shuffled_deck if @cards.empty?
+    else
+      puts "Sorry, You can't take any more."
+    end
   end
 
   def deal_cards(players)
@@ -14,11 +21,12 @@ class Card
 
   def pick_up_cards(players)
     players.map(&:fold_cards)
+    @round_over = true
   end
 
   private
 
-  def new_deck
+  def new_shuffled_deck
     cards = %w[A K Q J].concat (2..10).to_a
     suits = %w[♦️ ♥️ ♠️ ♣️]
     cards.product(suits).map(&:join).shuffle

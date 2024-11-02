@@ -1,12 +1,11 @@
 class Game
   attr_reader :current_player, :players, :user, :dealer
 
-
-  def initialize(user, dealer, bet)
+  def initialize(user, dealer, _bet)
     @players = [user, dealer]
     @user = user
     @dealer = dealer
-    @bank = take_bets(bet)
+    @bank = 0
     @moves_order = @players.cycle
     @current_player = @moves_order.next
   end
@@ -19,46 +18,71 @@ class Game
     @current_player = @moves_order.next
   end
 
+  def new_move
+    show_user_cards if current_player == user
+    current_player.make_choice
+  end
+
   def result
+    puts '*' * 80
     show_players_cards
-    if players.all? { |player| player.points > 21 } ||
-       players.map(&:points).uniq.length == 1
-      puts 'No winners!'
+    reward_result(winner)
+    puts '*' * 80
+  end
+
+  def reward_result(winner)
+    if draw?
+      puts '!!! Draw !!!'.center(80)
       players.each { |player| player.gain_money(@bank / 2) }
-    elsif user.points > 21 || dealer.points > 21
-      winner = players.min { |pl1, pl2| pl1.points <=> pl2.points }
     else
-      winner = players.min { |pl1, pl2| (21 - pl1.points) <=> (21 - pl2.points) }
+      puts "!!! #{winner.name.upcase} win game bank #{@bank}$ !!!".center(80)
+      winner.gain_money(@bank)
+      @bank = 0
     end
+  end
 
-    return if winner.nil?
+  def winner
+    return players.min { |p1, p2| p1.points <=> p2.points } if any_overkill?
 
-    puts "#{winner.name} win!"
-    winner.gain_money(@bank)
-    @bank = 0
+    players.min { |p1, p2| (21 - p1.points) <=> (21 - p2.points) }
+  end
+
+  def draw?
+    everyone_overkill? || evryone_same_points? ? true : false
+  end
+
+  def everyone_overkill?
+    players.all? { |player| player.points > 21 }
+  end
+
+  def any_overkill?
+    players.any? { |player| player.points > 21 }
+  end
+
+  def evryone_same_points?
+    players.map(&:points).uniq.length == 1
   end
 
   def show_user_cards
-    puts
-    puts "  #{dealer.name}: #{'🂠 ' * dealer.cards.count}"
-    puts "  #{user.name}: #{user.cards * ' '}  Points: #{user.points}"
-    puts
+    puts "\n#{dealer.name.rjust(8)}: #{'🂠 ' * dealer.cards.count}"
+    puts "#{user.name.rjust(8)}: #{user.cards * ' '}  Points: #{user.points}"
   end
 
   def show_players_cards
-    puts
     players.each do |player|
-      puts "  #{player.name}: #{player.cards * ' '}  Points: #{player.points}"
+      puts "#{player.name}: #{player.cards * ' '}  Points: #{player.points}".center(80)
     end
-    puts '********'
   end
 
   def show_players_bank
-    puts "  #{dealer.name} bank: #{dealer.money}"
-    puts "  #{user.name} bank: #{user.money}"
+    players.each { |player| puts "#{player.name} bank: #{player.money}$," }
   end
 
-  def new_move
-    @current_player.make_choice
+  def players_have_three_cards?
+    players.all? { |player| player.cards.count == 3 }
+  end
+
+  def players_have_money?
+    players.all? { |player| player.money.positive? }
   end
 end

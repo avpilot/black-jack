@@ -2,7 +2,6 @@ class Player
   attr_reader :name, :cards, :points, :money
 
   INITIAL_BANK = 100
-  NUMERALS_CARD = /^([1-9]|10)$/
 
   def initialize(name)
     @name = name
@@ -17,8 +16,8 @@ class Player
     bet
   end
 
-  def gain_money(win)
-    @money += win
+  def gain_money(game_bank)
+    @money += game_bank
   end
 
   def new_card(card)
@@ -37,7 +36,7 @@ class Player
 
   def card_points(card)
     card_value = card.slice(...-2)
-    if card_value.match(NUMERALS_CARD)
+    if card_value.match(/^([1-9]|10)$/)
       card_value.to_i
     elsif card_value == 'A'
       @points > 10 ? 1 : 11
