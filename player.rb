@@ -23,6 +23,7 @@ class Player
   def new_card(card)
     cards << card
     @points += card_points(card)
+    recalculate_overkill_ace_points if @points > 21
   end
 
   def fold_cards
@@ -38,10 +39,16 @@ class Player
     card_value = card.slice(...-2)
     if card_value.match(/^([1-9]|10)$/)
       card_value.to_i
-    elsif card_value == 'A'
-      @points > 10 ? 1 : 11
     else
-      10
+      card_value == 'A' ? 11 : 10
+    end
+  end
+
+  def recalculate_overkill_ace_points
+    aces = @cards.select { |a_card| a_card.start_with?('A') }
+    until aces.empty?
+      @points -= 10
+      break if @points <= 21
     end
   end
 end
